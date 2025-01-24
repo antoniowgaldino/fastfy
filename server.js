@@ -1,11 +1,14 @@
-// server.js
-const fastify = require('fastify')({ logger: true });
-const { Client } = require('pg');
+import fastify from 'fastify';
+import pkg from 'pg';
+const { Client } = pkg;
+
+// Criando o servidor Fastify com logger
+const app = fastify({ logger: true });
 
 // Configuração do banco de dados PostgreSQL
 const client = new Client({
   user: 'neondb_owner',
-  host: 'localhost',
+  host: 'ep-still-haze-a5ukpqb7-pooler.us-east-2.aws.neon.tech',
   database: 'neondb',
   password: 'npg_KzJnQI84tghT',
   port: 5432,
@@ -13,30 +16,30 @@ const client = new Client({
 
 // Conectar ao banco de dados
 client.connect()
-  .then(() => fastify.log.info('Banco de dados conectado com sucesso!'))
-  .catch((err) => fastify.log.error('Erro ao conectar ao banco de dados:', err));
+  .then(() => app.log.info('Banco de dados conectado com sucesso!'))
+  .catch((err) => app.log.error('Erro ao conectar ao banco de dados:', err));
 
 // Definindo uma rota simples
-fastify.get('/', async (request, reply) => {
+app.get('/', async (request, reply) => {
   return { message: 'Olá, Mundo!' };
 });
 
 // Definindo uma rota para testar o banco de dados
-fastify.get('/usuarios', async (request, reply) => {
+app.get('/pasteis', async (request, reply) => {
   try {
-    const res = await client.query('SELECT * FROM usuarios');
+    const res = await client.query('SELECT * FROM pasteis');
     return res.rows;
   } catch (err) {
-    fastify.log.error(err);
+    app.log.error(err);
     return reply.status(500).send({ error: 'Erro ao consultar banco de dados' });
   }
 });
 
 // Iniciar o servidor
-fastify.listen(3000, '0.0.0.0', (err, address) => {
+app.listen({ port: 3000 }, (err) => {
   if (err) {
-    fastify.log.error(err);
+    app.log.error('Erro ao iniciar o servidor:', err);
     process.exit(1);
   }
-  fastify.log.info(`Servidor rodando em ${address}`);
+  app.log.info(`Servidor rodando em http://localhost:3000`);
 });
